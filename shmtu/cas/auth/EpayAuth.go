@@ -14,7 +14,7 @@ import (
 
 // EpayAuth provides methods for Epay authentication and bill retrieval
 type EpayAuth struct {
-	savedCookie string
+	SavedCookie string
 	htmlCode    string
 
 	loginUrl    string
@@ -23,7 +23,8 @@ type EpayAuth struct {
 
 // GetBill retrieves bill information with pagination
 func (ea *EpayAuth) GetBill(
-	pageNo, tabNo, cookie string,
+	pageNo string, tabNo string,
+	cookie string,
 ) (*resty.Response, int, string, string, error) {
 	if pageNo == "" {
 		pageNo = "1"
@@ -43,13 +44,14 @@ func (ea *EpayAuth) GetBill(
 		SetRedirectPolicy(resty.NoRedirectPolicy()).
 		SetCloseConnection(true)
 
-	finalCookie := cookie
+	finalCookie := strings.TrimSpace(cookie)
 	if finalCookie == "" {
-		finalCookie = ea.savedCookie
+		finalCookie = ea.SavedCookie
 	}
+	println("Cookie:", finalCookie)
 
 	resp, _ := client.R().
-		SetHeader("Cookie", cookie).
+		SetHeader("Cookie", finalCookie).
 		Get(url)
 
 	responseCode := resp.StatusCode()
@@ -70,7 +72,7 @@ func (ea *EpayAuth) GetBill(
 		//		break
 		//	}
 		//}
-		ea.savedCookie = newCookie
+		ea.SavedCookie = newCookie
 		return resp,
 			responseCode, location, newCookie,
 			fmt.Errorf("redirect required, location: %s", location)
@@ -83,7 +85,8 @@ func (ea *EpayAuth) GetBill(
 
 // TestLoginStatus checks if the user is logged in
 func (ea *EpayAuth) TestLoginStatus() bool {
-	_, responseCode, loginUrl, savedCookie, _ := ea.GetBill("1", "1", ea.savedCookie)
+	_, responseCode, loginUrl, savedCookie, _ :=
+		ea.GetBill("1", "1", ea.SavedCookie)
 
 	if responseCode == http.StatusOK {
 		// OK
@@ -99,7 +102,7 @@ func (ea *EpayAuth) TestLoginStatus() bool {
 			}
 		}
 
-		ea.savedCookie = savedCookie
+		ea.SavedCookie = savedCookie
 		return false
 	}
 
@@ -108,7 +111,7 @@ func (ea *EpayAuth) TestLoginStatus() bool {
 
 // Login performs login with username and password
 func (ea *EpayAuth) Login(username, password string) (bool, error) {
-	if ea.loginUrl == "" || ea.savedCookie == "" {
+	if ea.loginUrl == "" || ea.SavedCookie == "" {
 		loggedIn := ea.TestLoginStatus()
 		if loggedIn {
 			return true, nil
@@ -116,9 +119,11 @@ func (ea *EpayAuth) Login(username, password string) (bool, error) {
 	}
 
 	// Call CasAuth functions (replace with actual implementation)
-	executionStr, err := common.GetExecutionString(ea.loginUrl, ea.savedCookie)
+	executionStr, err :=
+		common.GetExecutionString(ea.loginUrl, ea.SavedCookie)
 
-	imageData, loginCookie, err := captcha.GetImageDataFromUrlUsingGet(ea.savedCookie)
+	imageData, loginCookie, err :=
+		captcha.GetImageDataFromUrlUsingGet(ea.SavedCookie)
 	if err != nil {
 		return false, fmt.Errorf("failed to get captcha image: %w", err)
 	}
@@ -163,7 +168,7 @@ func (ea *EpayAuth) Login(username, password string) (bool, error) {
 	ea.loginCookie = resultCas.Cookie
 
 	resultCas, err =
-		common.CasRedirect(resultCas.Location, ea.savedCookie)
+		common.CasRedirect(resultCas.Location, ea.SavedCookie)
 
 	if err != nil {
 		return false, fmt.Errorf("cas redirect failed: %w", err)
