@@ -12,10 +12,10 @@ import (
 //type CasAuthStatus int
 
 const (
-	SUCCESS int = iota
-	VALIDATE_CODE_ERROR
-	PASSWORD_ERROR
-	FAILURE
+	Success int = iota
+	ValidateCodeError
+	PasswordError
+	Failure
 )
 
 func GetExecutionString(url string, cookie string) (string, error) {
@@ -103,19 +103,19 @@ func CasLogin(
 		}
 
 		errorPanel := document.Find("#loginErrorsPanel")
-		errorText := errorPanel.Text()
+		errorText := strings.TrimSpace(errorPanel.Text())
 		fmt.Println(errorText)
 
 		if strings.Contains(errorText, "account is not recognized") {
 			fmt.Println("用户名或密码错误")
 			result = &CasAuthResponse{
-				ResponseCode: PASSWORD_ERROR,
+				ResponseCode: PasswordError,
 				ErrorMessage: errorText,
 			}
 		} else if strings.Contains(errorText, "reCAPTCHA") {
 			fmt.Println("验证码错误")
 			result = &CasAuthResponse{
-				ResponseCode: VALIDATE_CODE_ERROR,
+				ResponseCode: ValidateCodeError,
 				ErrorMessage: errorText,
 			}
 		} else {

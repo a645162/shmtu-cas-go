@@ -2,8 +2,11 @@ package auth
 
 import (
 	"fmt"
-	"github.com/go-resty/resty/v2"
 	"net/http"
+	"strings"
+
+	"github.com/go-resty/resty/v2"
+
 	"shmtu-cas-go/shmtu/cas/auth/common"
 	"shmtu-cas-go/shmtu/cas/captcha"
 	"shmtu-cas-go/shmtu/utils"
@@ -22,6 +25,14 @@ type EpayAuth struct {
 func (ea *EpayAuth) GetBill(
 	pageNo, tabNo, cookie string,
 ) (*resty.Response, int, string, string, error) {
+	if pageNo == "" {
+		pageNo = "1"
+	}
+	if tabNo == "" {
+		tabNo = "1"
+	}
+
+	// https://ecard.shmtu.edu.cn/epay/consume/query?pageNo=1&tabNo=1
 	url := fmt.Sprintf(
 		"https://ecard.shmtu.edu.cn/epay/consume/query?pageNo=%s&tabNo=%s",
 		pageNo,
@@ -80,6 +91,14 @@ func (ea *EpayAuth) TestLoginStatus() bool {
 	} else if responseCode == http.StatusFound {
 		// Update cookie after redirection in GetBill
 		ea.loginUrl = loginUrl
+
+		cookieParts := strings.Split(savedCookie, ";")
+		for _, part := range cookieParts {
+			if strings.Contains(strings.TrimSpace(part), "JSESSIONID") {
+				savedCookie = strings.TrimSpace(part)
+			}
+		}
+
 		ea.savedCookie = savedCookie
 		return false
 	}
@@ -106,6 +125,7 @@ func (ea *EpayAuth) Login(username, password string) (bool, error) {
 	if imageData == nil {
 		return false, fmt.Errorf("failed to get captcha image data")
 	}
+	ea.loginCookie = loginCookie
 
 	_ = utils.SaveImageDataToFile(imageData, "test.png")
 
@@ -158,7 +178,7 @@ func (ea *EpayAuth) Login(username, password string) (bool, error) {
 
 	finalTestStatus := ea.TestLoginStatus()
 	if !finalTestStatus {
-		return false, fmt.Errorf("login failed")
+		return false, fmt.Errorf("login final test failed")
 	}
 
 	return true, nil

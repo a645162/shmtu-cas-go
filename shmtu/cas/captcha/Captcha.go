@@ -3,12 +3,13 @@ package captcha
 import (
 	"bytes"
 	"fmt"
-	"github.com/go-resty/resty/v2"
 	"io"
 	"net"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/go-resty/resty/v2"
 )
 
 func GetImageDataFromUrl(imageUrl string) ([]byte, error) {

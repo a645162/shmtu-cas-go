@@ -3,6 +3,7 @@ package demo
 import (
 	"fmt"
 	"os"
+
 	"shmtu-cas-go/shmtu/cas/auth"
 )
 
@@ -31,11 +32,14 @@ func DemoBill() {
 	// 处理响应
 	if err != nil {
 		fmt.Println("Error retrieving bill:", err)
-		return
 	}
 
 	fmt.Printf("Status Code: %d\n", statusCode)
 	fmt.Printf("HTML Code: %s\n", htmlCode)
+
+	println("Test login status:", epayAuth.TestLoginStatus())
+
+	println("finish")
 
 	// 如果需要，可以处理 response.Body() 中的数据
 
