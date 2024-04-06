@@ -4,6 +4,7 @@
     <inspection_tool class="GoDfaErrorMayBeNotNil" enabled="true" level="WARNING" enabled_by_default="true">
       <methods>
         <method importPath="github.com/go-resty/resty/v2" receiver="*Request" name="Get" />
+        <method importPath="github.com/go-resty/resty/v2" receiver="*Request" name="Post" />
       </methods>
     </inspection_tool>
     <inspection_tool class="PyPep8NamingInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">

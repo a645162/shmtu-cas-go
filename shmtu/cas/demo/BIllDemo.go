@@ -17,8 +17,8 @@ func DemoBill() {
 	username := os.Getenv("SHMTU_USERNAME")
 	password := os.Getenv("SHMTU_PASSWORD")
 
-	fmt.Println("Username:", username)
-	fmt.Println("Password:", password)
+	//fmt.Println("Username:", username)
+	//fmt.Println("Password:", password)
 
 	loginStatus, err := epayAuth.Login(username, password)
 	if err != nil {
@@ -32,7 +32,14 @@ func DemoBill() {
 		epayAuth.GetBill("1", "1", "")
 
 	fmt.Printf("Status Code: %d\n", statusCode)
-	fmt.Printf("HTML Code: %s\n", htmlCode)
+	//fmt.Printf("HTML Code: %s\n", htmlCode)
+
+	htmlCodeBytes := []byte(htmlCode)
+	err = os.WriteFile("result.html", htmlCodeBytes, 0644)
+	if err != nil {
+		fmt.Println("写入文件时发生错误:", err)
+		return
+	}
 
 	println("Test login status:", epayAuth.TestLoginStatus())
 

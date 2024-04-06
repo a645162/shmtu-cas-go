@@ -57,7 +57,7 @@ func (ea *EpayAuth) GetBill(
 	responseCode := resp.StatusCode()
 
 	if responseCode == http.StatusOK {
-		ea.htmlCode = string(resp.Body())
+		ea.htmlCode = strings.TrimSpace(string(resp.Body()))
 		return resp, responseCode, ea.htmlCode, finalCookie, nil
 	} else if responseCode == http.StatusFound {
 		location := resp.Header().Get("Location")
