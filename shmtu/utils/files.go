@@ -36,7 +36,7 @@ func ReadImageFromFile(fileName string) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func SaveTextToFile(text string, filePath string) error {
+func SaveTextToFile(filePath string, text string) error {
 	return os.WriteFile(filePath, []byte(text), 0644)
 }
 
