@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"regexp"
+	"shmtu-cas-go/shmtu/utils/program_time"
+	"shmtu-cas-go/shmtu/utils/str"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
@@ -16,10 +19,13 @@ const (
 )
 
 type BillItemInfo struct {
-	dateStr           string
-	timeStr           string
-	timeStrFormat     string
-	dateTimeStrFormat string
+	dateStr             string
+	timeStr             string
+	timeStrFormat       string
+	dateTimeStrFormated string
+
+	datetime  time.Time
+	timeStamp int64
 
 	itemType   string
 	number     string
@@ -35,7 +41,10 @@ func ConvertBillInfoToHashmap(billInfo *BillItemInfo) map[string]string {
 	hashmap["dateStr"] = billInfo.dateStr
 	hashmap["timeStr"] = billInfo.timeStr
 	hashmap["timeStrFormat"] = billInfo.timeStrFormat
-	hashmap["dateTimeStrFormat"] = billInfo.dateTimeStrFormat
+	hashmap["dateTimeStrFormated"] = billInfo.dateTimeStrFormated
+	hashmap["datetime"] = billInfo.datetime.String()
+	hashmap["timeStamp"] = strconv.FormatInt(billInfo.timeStamp, 10)
+
 	hashmap["itemType"] = billInfo.itemType
 	hashmap["number"] = billInfo.number
 	hashmap["targetUser"] = billInfo.targetUser
@@ -102,8 +111,8 @@ func GetTotalPagesCount(htmlElement *goquery.Selection) (int, error) {
 }
 
 func GetBillList(htmlElement *goquery.Selection) ([]BillItemInfo, error) {
-	tbodyElemtnt := htmlElement.Find("span > table > tbody")
-	trElement := tbodyElemtnt.Find("tr")
+	tbodyElement := htmlElement.Find("span > table > tbody")
+	trElement := tbodyElement.Find("tr")
 	println("trElement:", trElement.Length())
 
 	billList := make([]BillItemInfo, trElement.Length())
@@ -123,13 +132,26 @@ func GetBillList(htmlElement *goquery.Selection) ([]BillItemInfo, error) {
 		}
 		billItemInfo.dateStr = strings.TrimSpace(timeChildren.Eq(0).Text())
 		billItemInfo.timeStr = strings.TrimSpace(timeChildren.Eq(1).Text())
+		billItemInfo.timeStrFormat =
+			program_time.AddChatTo6DigitTime(billItemInfo.timeStr)
+		billItemInfo.dateTimeStrFormated =
+			billItemInfo.dateStr + " " + billItemInfo.timeStrFormat
+
+		datetime, err :=
+			program_time.ParseTimeFromString(billItemInfo.dateTimeStrFormated)
+		if err != nil {
+			return nil, fmt.Errorf("解析时间失败: %v", err)
+		}
+		billItemInfo.datetime = datetime
+		billItemInfo.timeStamp = datetime.Unix()
 
 		dealChildren := children.Eq(1).Children()
 		if dealChildren.Length() != 2 {
 			return nil, fmt.Errorf("dealChildren.Length() != 2")
 		}
 		billItemInfo.itemType = strings.TrimSpace(dealChildren.Eq(0).Text())
-		billItemInfo.number = strings.TrimSpace(dealChildren.Eq(1).Text())
+		billItemInfo.number =
+			str.OnlyDigit(strings.TrimSpace(dealChildren.Eq(1).Text()))
 
 		billItemInfo.targetUser = strings.TrimSpace(children.Eq(2).Text())
 		billItemInfo.money = strings.TrimSpace(children.Eq(3).Text())
