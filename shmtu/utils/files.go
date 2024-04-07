@@ -35,3 +35,15 @@ func ReadImageFromFile(fileName string) ([]byte, error) {
 	// 返回图像的字节数据
 	return buf.Bytes(), nil
 }
+
+func SaveTextToFile(text string, filePath string) error {
+	return os.WriteFile(filePath, []byte(text), 0644)
+}
+
+func ReadTextFromFile(filePath string) (string, error) {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}

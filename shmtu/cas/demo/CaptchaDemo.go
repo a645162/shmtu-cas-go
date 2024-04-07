@@ -7,7 +7,7 @@ import (
 	"shmtu-cas-go/shmtu/utils"
 )
 
-func DemoCaptcha() {
+func CaptchaDemo() {
 	imageUrl := "https://cas.shmtu.edu.cn/cas/captcha"
 	imageData, err := captcha.GetImageDataFromUrl(imageUrl)
 	if err != nil {

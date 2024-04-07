@@ -110,7 +110,15 @@ func (ea *EpayAuth) TestLoginStatus() bool {
 }
 
 // Login performs login with username and password
-func (ea *EpayAuth) Login(username, password string) (bool, error) {
+func (ea *EpayAuth) Login(
+	username, password string,
+	ocrServerHost string,
+) (bool, error) {
+
+	if ocrServerHost == "" {
+		ocrServerHost = "localhost"
+	}
+
 	if ea.loginUrl == "" || ea.SavedCookie == "" {
 		loggedIn := ea.TestLoginStatus()
 		if loggedIn {
@@ -135,7 +143,7 @@ func (ea *EpayAuth) Login(username, password string) (bool, error) {
 	_ = utils.SaveImageDataToFile(imageData, "test.png")
 
 	validateCode, err := captcha.OcrByRemoteTcpServer(
-		"127.0.0.1", 21601, imageData,
+		ocrServerHost, 21601, imageData,
 	)
 	if err != nil {
 		return false, fmt.Errorf("failed to recognize captcha: %w", err)

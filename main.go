@@ -5,6 +5,7 @@ import (
 )
 
 func main() {
-	//demo.DemoCaptcha()
-	demo.DemoBill()
+	//demo.CaptchaDemo()
+	//demo.BillDemo()
+	demo.ParseBillDemo()
 }

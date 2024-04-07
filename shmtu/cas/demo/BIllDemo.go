@@ -5,9 +5,10 @@ import (
 	"os"
 
 	"shmtu-cas-go/shmtu/cas/auth"
+	"shmtu-cas-go/shmtu/utils"
 )
 
-func DemoBill() {
+func BillDemo() {
 
 	// 创建 EpayAuth 实例
 	epayAuth := &auth.EpayAuth{}
@@ -16,11 +17,12 @@ func DemoBill() {
 
 	username := os.Getenv("SHMTU_USERNAME")
 	password := os.Getenv("SHMTU_PASSWORD")
+	ocrServerHost := os.Getenv("OCR_SERVER_HOST")
 
 	//fmt.Println("Username:", username)
 	//fmt.Println("Password:", password)
 
-	loginStatus, err := epayAuth.Login(username, password)
+	loginStatus, err := epayAuth.Login(username, password, ocrServerHost)
 	if err != nil {
 		fmt.Println("Error logging in:", err)
 		return
@@ -34,8 +36,7 @@ func DemoBill() {
 	fmt.Printf("Status Code: %d\n", statusCode)
 	//fmt.Printf("HTML Code: %s\n", htmlCode)
 
-	htmlCodeBytes := []byte(htmlCode)
-	err = os.WriteFile("result.html", htmlCodeBytes, 0644)
+	err = utils.SaveTextToFile("result.html", htmlCode)
 	if err != nil {
 		fmt.Println("写入文件时发生错误:", err)
 		return

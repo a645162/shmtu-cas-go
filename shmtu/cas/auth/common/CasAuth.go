@@ -52,6 +52,7 @@ type CasAuthResponse struct {
 	Location     string
 	Cookie       string
 	ErrorMessage string
+	ResultType   int
 }
 
 func CasLogin(
@@ -95,6 +96,7 @@ func CasLogin(
 			ResponseCode: responseCode,
 			Location:     location,
 			Cookie:       newCookie,
+			ResultType:   Success,
 		}
 	} else {
 		document, err := goquery.NewDocumentFromReader(strings.NewReader(resp.String()))
@@ -109,19 +111,22 @@ func CasLogin(
 		if strings.Contains(errorText, "account is not recognized") {
 			fmt.Println("用户名或密码错误")
 			result = &CasAuthResponse{
-				ResponseCode: PasswordError,
+				ResponseCode: responseCode,
 				ErrorMessage: errorText,
+				ResultType:   PasswordError,
 			}
 		} else if strings.Contains(errorText, "reCAPTCHA") {
 			fmt.Println("验证码错误")
 			result = &CasAuthResponse{
-				ResponseCode: ValidateCodeError,
+				ResponseCode: responseCode,
 				ErrorMessage: errorText,
+				ResultType:   ValidateCodeError,
 			}
 		} else {
 			result = &CasAuthResponse{
 				ResponseCode: responseCode,
 				ErrorMessage: errorText,
+				ResultType:   Failure,
 			}
 		}
 	}
