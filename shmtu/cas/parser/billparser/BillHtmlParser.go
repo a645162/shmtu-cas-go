@@ -19,6 +19,7 @@ const (
 )
 
 type BillItemInfo struct {
+	// 交易(创建)时间
 	dateStr             string
 	timeStr             string
 	timeStrFormat       string
@@ -27,12 +28,21 @@ type BillItemInfo struct {
 	datetime  time.Time
 	timeStamp int64
 
-	itemType   string
-	number     string
+	// (交易)名称
+	itemType string
+	// 交易号
+	number string
+	// 对方
 	targetUser string
-	money      string
-	method     string
-	status     string
+
+	// 金额
+	moneyStr string
+	money    float32
+
+	// 付款方式
+	method string
+	// 状态
+	status string
 }
 
 func ConvertBillInfoToHashmap(billInfo *BillItemInfo) map[string]string {
@@ -48,7 +58,9 @@ func ConvertBillInfoToHashmap(billInfo *BillItemInfo) map[string]string {
 	hashmap["itemType"] = billInfo.itemType
 	hashmap["number"] = billInfo.number
 	hashmap["targetUser"] = billInfo.targetUser
-	hashmap["money"] = billInfo.money
+
+	hashmap["moneyStr"] = billInfo.moneyStr
+
 	hashmap["method"] = billInfo.method
 	hashmap["status"] = billInfo.status
 
@@ -154,7 +166,14 @@ func GetBillList(htmlElement *goquery.Selection) ([]BillItemInfo, error) {
 			str.OnlyDigit(strings.TrimSpace(dealChildren.Eq(1).Text()))
 
 		billItemInfo.targetUser = strings.TrimSpace(children.Eq(2).Text())
-		billItemInfo.money = strings.TrimSpace(children.Eq(3).Text())
+
+		billItemInfo.moneyStr = strings.TrimSpace(children.Eq(3).Text())
+		money, err := strconv.ParseFloat(billItemInfo.moneyStr, 32)
+		if err != nil {
+			return nil, fmt.Errorf("解析金额失败: %v", err)
+		}
+		billItemInfo.money = float32(money)
+
 		billItemInfo.method = strings.TrimSpace(children.Eq(4).Text())
 		billItemInfo.status = strings.TrimSpace(children.Eq(5).Text())
 

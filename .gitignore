@@ -142,3 +142,4 @@ fabric.properties
 /go.sum
 /test.png
 /result*.html
+/result*

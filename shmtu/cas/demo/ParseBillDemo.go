@@ -2,6 +2,7 @@ package demo
 
 import (
 	"shmtu-cas-go/shmtu/cas/parser/billparser"
+	"shmtu-cas-go/shmtu/cas/parser/billparser/export"
 	"shmtu-cas-go/shmtu/utils"
 )
 
@@ -23,6 +24,16 @@ func ParseBillDemo() {
 
 	println("pageCount:", pageCount)
 
-	_, _ = billparser.GetBillList(tabElement)
+	billList, err := billparser.GetBillList(tabElement)
+	if err != nil {
+		panic(err)
+	}
+	err = export.ToCsvFile(
+		"./result.csv",
+		billList,
+	)
+	if err != nil {
+		panic(err)
+	}
 
 }
