@@ -15,9 +15,12 @@ func BillDemo() {
 
 	println("Test Result:", epayAuth.TestLoginStatus())
 
-	username := os.Getenv("SHMTU_USERNAME")
+	username := os.Getenv("SHMTU_USER_ID")
+	if username == "" {
+		username = os.Getenv("SHMTU_USERNAME")
+	}
 	password := os.Getenv("SHMTU_PASSWORD")
-	ocrServerHost := os.Getenv("OCR_SERVER_HOST")
+	ocrServerHost := os.Getenv("SHMTU_OCR_HOST")
 
 	//fmt.Println("Username:", username)
 	//fmt.Println("Password:", password)
